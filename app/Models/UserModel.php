@@ -1,5 +1,4 @@
 <?php // Pastikan ini adalah baris pertama dalam file
-
 namespace App\Models;
 
 use CodeIgniter\Model;

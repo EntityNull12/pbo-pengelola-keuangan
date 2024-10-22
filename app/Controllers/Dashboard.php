@@ -1,13 +1,21 @@
 <?php
 
 namespace App\Controllers;
+use App\Models\PengelolaModel;
 
 class Dashboard extends BaseController
 {
+    protected $pengelolaModel;
+    public function __construct()
+    {
+        $this->pengelolaModel = new PengelolaModel();
+    }
     public function index()
     {
+        $pengelola = $this->pengelolaModel->findAll();
         $data = [
-            'title' => 'Dashboard'
+            'title' => 'Dashboard',
+            'pengelola' => $pengelola
         ];
         echo view('template/header', $data);
         echo view('dashboard/dashboard');

@@ -6,14 +6,13 @@ use App\Models\UserModel;
 
 class Login extends BaseController
 {
-    public function index()
-    {
+        public function index()
+    {  
         $data = [
-            'title' => 'Masuk'
+            'title' => 'Masuk',
         ];
-
         echo view('template/header', $data);
-        echo view('login');
+        echo view('login', $data);
         echo view('template/footer');
     }
     
