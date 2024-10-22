@@ -6,24 +6,34 @@ use App\Models\UserModel;
 
 class Login extends BaseController
 {
-    protected $userModel;
-    public function __construct()
-    {
-        $this->userModel = new UserModel();
-    }
-    public function index()
+        public function index()
     {  
-        $user = $this->userModel->findAll();
         $data = [
             'title' => 'Masuk',
-            'user' => $user
         ];
-
-        // $userModel = new \App\Models\UserModel();
-      
-        // dd($user);
         echo view('template/header', $data);
         echo view('login', $data);
         echo view('template/footer');
+    }
+    
+    public function authenticate()
+    {
+        $userModel = new UserModel();
+
+        // Mendapatkan input dari form
+        $username = $this->request->getPost('username');
+        $password = $this->request->getPost('password');
+
+        // Mencari pengguna berdasarkan username
+        $user = $userModel->where('username', $username)->first();
+
+        // Validasi username dan password
+        if ($user && password_verify($password, $user['password'])) {
+            // Simpan data pengguna ke session
+            session()->set('user', $user);
+            return redirect()->to('/dashboard'); // Arahkan ke halaman dashboard
+        } else {
+            return redirect()->back()->with('error', 'Username atau password salah.')->withInput();
+        }
     }
 }
