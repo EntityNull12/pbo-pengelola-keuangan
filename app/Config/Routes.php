@@ -12,3 +12,6 @@ $routes->get('/login', 'Login::index');
 $routes->post('/login/authenticate', 'Login::authenticate'); // Perbaikan di sini
 $routes->get('/dashboard', 'Dashboard::index');
 $routes->get('/dashboard/pengelola', 'Dashboard::pengelola');
+$routes->get('/about', 'About::about');
+$routes->get('/profile', 'Profile::index');
+$routes->post('change-password', 'ChangePassword::update');

@@ -17,23 +17,24 @@ class Login extends BaseController
     }
     
     public function authenticate()
-    {
-        $userModel = new UserModel();
+{
+    $userModel = new UserModel();
 
-        // Mendapatkan input dari form
-        $username = $this->request->getPost('username');
-        $password = $this->request->getPost('password');
+    // Mendapatkan input dari form
+    $username = $this->request->getPost('username');
+    $password = $this->request->getPost('password');
 
-        // Mencari pengguna berdasarkan username
-        $user = $userModel->where('username', $username)->first();
+    // Mencari pengguna berdasarkan username
+    $user = $userModel->where('username', $username)->first();
 
-        // Validasi username dan password
-        if ($user && password_verify($password, $user['password'])) {
-            // Simpan data pengguna ke session
-            session()->set('user', $user);
-            return redirect()->to('/dashboard'); // Arahkan ke halaman dashboard
-        } else {
-            return redirect()->back()->with('error', 'Username atau password salah.')->withInput();
-        }
+    // Validasi username dan password
+    if ($user && password_verify($password, $user['password'])) {
+        // Simpan data pengguna ke session
+        session()->set('user', $user);
+        session()->set('nama', $user['nama']); // Menyimpan nama pengguna ke dalam sesi
+        return redirect()->to('/dashboard'); // Arahkan ke halaman dashboard
+    } else {
+        return redirect()->back()->with('error', 'Username atau password salah.')->withInput();
     }
+}
 }
