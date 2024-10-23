@@ -1,34 +1,17 @@
 <h2 class="font-bold text-4xl my-5">Dashboard</h2>
 
-<h6 class="font-medium text-lg mt-8 mb-4 text-center">Uang saat ini</h6>
+<h3 class="font-medium text-4xl my-5 text-center">Your Balance</h3>
 <h5 class="font-bold text-5xl  text-center">Rp300.000</h5>
 
-<a href="/dashboard/pengelola" class="text-yellow-200 bg-yellow-700 hover:bg-yellow-800 focus:ring-4 focus:outline-none focus:ring-yellow-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center ">form</a>
-
+<div class="flex justify-center gap-4 mt-6">
+    <a href="/dashboard/pengelola" class="text-yellow-200 bg-yellow-700 hover:bg-yellow-800 focus:ring-4 focus:outline-none focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+        Catatan
+    </a>
+    <a href="/dashboard/riwayat" class="text-yellow-200 bg-yellow-700 hover:bg-yellow-800 focus:ring-4 focus:outline-none focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+        Riwayat Catatan
+    </a>
+</div>
 <div class="relative overflow-x-auto mt-6">
-    <table class="w-full text-sm text-left rtl:text-right text-yellow-500 bg-transparent ">
-        <thead class="text-xs text-yellow-300 uppercase bg-transparent  ">
-            <tr>
-                <th scope="col" class="px-6 py-3">
-                    no
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    tanggal
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    jumlah
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    uang masuk / keluar
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    deskripsi
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    Aksi
-                </th>
-            </tr>
-        </thead>
         <tbody>
         <?php //foreach ($user as $k) :?>
             <tr class="bg-transparant border-b ">
@@ -46,10 +29,6 @@
                 </td>
                 <td class="px-6 py-4">
                 <? //=$k['password']; ?>
-                </td>
-                <td class="px-6 py-4">
-                <a href=""  class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none ">Edit</a>
-                <a href=""  class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none ">Hapus</a>
                 </td>
             </tr>
             <?php //endforeach; ?>
