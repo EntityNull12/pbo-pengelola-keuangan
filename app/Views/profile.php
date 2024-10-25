@@ -32,7 +32,7 @@
                 <button @click="modalOpen = true" class="block px-4 py-2 text-sm hover:bg-indigo-600">Change Password</button>
                 <button @click="modalOpenProfilePhoto = true" class="block px-4 py-2 text-sm hover:bg-indigo-600">Change Profile Photo</button>
             </div>
-            <img src="/uploads/profile.jpg" alt="User Photo" class="w-32 h-32 rounded-full border-4 border-indigo-600 mx-auto mb-4">
+            <img src="<?= base_url('uploads/' . $profile_photo) ?>" alt="User Photo" class="w-32 h-32 rounded-full object-cover border-4 border-indigo-600 mx-auto mb-4">
             <h1 class="text-4xl font-bold mb-2"><?php echo esc($nama); ?></h1>
             <p class="text-lg text-gray-400 mb-6">Pengguna</p>
             <div>

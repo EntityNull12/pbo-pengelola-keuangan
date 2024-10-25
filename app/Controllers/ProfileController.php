@@ -16,11 +16,15 @@ class ProfileController extends BaseController
     public function profile()
     {
         $userId = session()->get('user_id'); // Sesuaikan dengan cara Anda mendapatkan ID pengguna
+        if (empty($userId)) {
+            session()->setFlashdata('error', 'Anda harus login terlebih dahulu.');
+            return redirect()->to('/login');
+        }
         $user = $this->userModel->find($userId);
         $data = [
             'title' => 'Profil Pengguna',
             'nama' => $user['nama'],
-            'profile_photo' => $user['profile_photo'], // Ambil nama file foto dari database
+            'profile_photo' => $user['profile_photo']?? 'profile.jpg', // Ambil nama file foto dari database
         ];
         return view('profile', $data);
     }
@@ -42,7 +46,7 @@ class ProfileController extends BaseController
         // Mendapatkan nama file baru
         $newName = $file->getRandomName();
         // Memindahkan file ke folder uploads
-        $file->move(WRITEPATH . 'uploads', $newName);
+        $file->move(FCPATH . 'uploads', $newName);
 
         $this->userModel->update($userId, ['profile_photo' => $newName]);
         // Mengupdate nama file di database dengan where() dan set()

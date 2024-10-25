@@ -30,8 +30,10 @@ class Login extends BaseController
     // Validasi username dan password
     if ($user && password_verify($password, $user['password'])) {
         // Simpan data pengguna ke session
+        session()->set('user_id', $user['id']); // Menyimpan user_id ke dalam sesi
         session()->set('user', $user);
         session()->set('nama', $user['nama']); // Menyimpan nama pengguna ke dalam sesi
+        session()->set('foto', $user['profile_photo']);
         return redirect()->to('/dashboard'); // Arahkan ke halaman dashboard
     } else {
         return redirect()->back()->with('error', 'Username atau password salah.')->withInput();
