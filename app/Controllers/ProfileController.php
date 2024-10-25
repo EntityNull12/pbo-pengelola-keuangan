@@ -52,6 +52,8 @@ class ProfileController extends BaseController
         // Mengupdate nama file di database dengan where() dan set()
         $this->userModel->where('id', $userId)->set(['profile_photo' => $newName])->update();
 
+        session()->set('foto', $newName);
+
         // Set flashdata untuk notifikasi sukses
         session()->setFlashdata('success', 'Foto profil berhasil diubah!');
     } else {
