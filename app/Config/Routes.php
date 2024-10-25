@@ -15,3 +15,4 @@ $routes->get('/dashboard/pengelola', 'Dashboard::pengelola');
 $routes->get('/about', 'About::about');
 $routes->get('/profile', 'Profile::index');
 $routes->post('change-password', 'ChangePassword::update');
+$routes->post('profile-photo/update', 'ProfileController::updateProfilePhoto');

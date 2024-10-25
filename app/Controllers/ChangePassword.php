@@ -23,34 +23,35 @@ class ChangePassword extends BaseController
     }
 
     public function update()
-    {
-        // Mengambil data dari session
-        $user = session()->get('user');
+{
+    $user = session()->get('user');
+    $oldPassword = $this->request->getPost('old_password');
+    $newPassword = $this->request->getPost('new_password');
+    $confirmPassword = $this->request->getPost('confirm_password');
 
-        // Validasi input
-        $oldPassword = $this->request->getPost('old_password');
-        $newPassword = $this->request->getPost('new_password');
-        $confirmPassword = $this->request->getPost('confirm_password');
-
-        // Cek jika password lama cocok
-        if (!password_verify($oldPassword, $user['password'])) {
-            return redirect()->back()->with('error', 'Password lama salah.')->withInput();
-        }
-
-        // Validasi jika password baru dan konfirmasi password cocok
-        if ($newPassword !== $confirmPassword) {
-            return redirect()->back()->with('error', 'Password baru dan konfirmasi tidak cocok.')->withInput();
-        }
-
-        // Simpan password baru ke database
-        $this->userModel->update($user['id'], [
-            'password' => password_hash($newPassword, PASSWORD_DEFAULT),
-        ]);
-
-        // Update session dengan password baru
-        $user['password'] = password_hash($newPassword, PASSWORD_DEFAULT);
-        session()->set('user', $user);
-
-        return redirect()->to('/dashboard')->with('success', 'Password berhasil diubah.');
+    // Cek jika password lama cocok
+    if (!password_verify($oldPassword, $user['password'])) {
+        session()->setFlashdata('old_password_error', 'Password lama salah.');
+        return redirect()->back()->withInput();
     }
+
+    // Validasi jika password baru dan konfirmasi password cocok
+    if ($newPassword !== $confirmPassword) {
+        session()->setFlashdata('confirm_password_error', 'Password baru dan konfirmasi tidak cocok.');
+        return redirect()->back()->withInput();
+    }
+
+    // Simpan password baru ke database
+    $this->userModel->update($user['id'], [
+        'password' => password_hash($newPassword, PASSWORD_DEFAULT),
+    ]);
+
+    // Update session dengan password baru
+    $user['password'] = password_hash($newPassword, PASSWORD_DEFAULT);
+    session()->set('user', $user);
+
+    // Redirect ke dashboard dengan pesan sukses
+    return redirect()->to('/dashboard')->with('success', 'Password berhasil diubah.');
+}
+
 }
