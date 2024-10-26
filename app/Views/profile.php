@@ -31,6 +31,7 @@
             <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg z-10" x-transition>
                 <button @click="modalOpen = true" class="block px-4 py-2 text-sm hover:bg-indigo-600">Change Password</button>
                 <button @click="modalOpenProfilePhoto = true" class="block px-4 py-2 text-sm hover:bg-indigo-600">Change Profile Photo</button>
+                <a href="/logout" class="block px-4 py-2 text-sm hover:bg-indigo-600">Logout</a>
             </div>
             <img src="<?= base_url('uploads/' . $profile_photo) ?>" alt="User Photo" class="w-32 h-32 rounded-full object-cover border-4 border-indigo-600 mx-auto mb-4">
             <h1 class="text-4xl font-bold mb-2"><?php echo esc($nama); ?></h1>
@@ -104,7 +105,7 @@
                     <?php if (session()->getFlashdata('error')): ?>
                         <div class="text-red-500 text-sm mt-1">
                             <?= session()->getFlashdata('error') ?>
-                        </div>
+                        </div>  
                     <?php endif; ?>
                 </div>
                 <div class="flex justify-between">

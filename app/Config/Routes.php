@@ -16,3 +16,4 @@ $routes->get('/about', 'About::about');
 $routes->get('/profile', 'Profile::index');
 $routes->post('change-password', 'ChangePassword::update');
 $routes->post('profile-photo/update', 'ProfileController::updateProfilePhoto');
+$routes->get('/logout', 'Login::logout');

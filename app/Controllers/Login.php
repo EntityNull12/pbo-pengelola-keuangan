@@ -39,4 +39,14 @@ class Login extends BaseController
         return redirect()->back()->with('error', 'Username atau password salah.')->withInput();
     }
 }
+
+public function logout()
+{
+    // Hapus semua data sesi
+    session()->destroy();
+
+    // Arahkan kembali ke halaman login
+    return redirect()->to('/login');
+}
+
 }
