@@ -6,8 +6,22 @@ use App\Models\UserModel;
 
 class Login extends BaseController
 {
-        public function index()
-    {  
+    protected $userModel;
+    protected $session;
+
+    public function __construct()
+    {
+        $this->userModel = new UserModel();
+        $this->session = \Config\Services::session();
+    }
+
+    public function index()
+    {
+        // Jika user sudah login, redirect ke dashboard
+        if (session()->get('user_id')) {
+            return redirect()->to('/dashboard');
+        }
+
         $data = [
             'title' => 'Masuk',
         ];
@@ -17,36 +31,70 @@ class Login extends BaseController
     }
     
     public function authenticate()
-{
-    $userModel = new UserModel();
+    {
+        // Validasi input
+        $rules = [
+            'username' => 'required|min_length[4]',
+            'password' => 'required|min_length[6]'
+        ];
 
-    // Mendapatkan input dari form
-    $username = $this->request->getPost('username');
-    $password = $this->request->getPost('password');
+        if (!$this->validate($rules)) {
+            return redirect()->back()
+                ->with('error', 'Username atau password tidak valid.')
+                ->withInput();
+        }
 
-    // Mencari pengguna berdasarkan username
-    $user = $userModel->where('username', $username)->first();
+        // Mendapatkan input dari form
+        $username = $this->request->getPost('username');
+        $password = $this->request->getPost('password');
 
-    // Validasi username dan password
-    if ($user && password_verify($password, $user['password'])) {
-        // Simpan data pengguna ke session
-        session()->set('user_id', $user['id']); // Menyimpan user_id ke dalam sesi
-        session()->set('user', $user);
-        session()->set('nama', $user['nama']); // Menyimpan nama pengguna ke dalam sesi
-        session()->set('foto', $user['profile_photo']);
-        return redirect()->to('/dashboard'); // Arahkan ke halaman dashboard
-    } else {
-        return redirect()->back()->with('error', 'Username atau password salah.')->withInput();
+        // Mencari pengguna berdasarkan username
+        $user = $this->userModel->where('username', $username)->first();
+
+        // Validasi username dan password
+        if ($user && password_verify($password, $user['password'])) {
+            // Set session data
+            $sessionData = [
+                'user_id'    => $user['id'],            // untuk identifikasi user
+                'username'   => $user['username'],      // untuk tampilan
+                'nama'       => $user['nama'],          // untuk tampilan
+                'foto'       => $user['profile_photo'], // untuk tampilan
+                'logged_in'  => true                    // untuk cek status login
+            ];
+            
+            // Simpan data pengguna ke session
+            session()->set($sessionData);
+
+            // Log aktivitas login (opsional)
+            log_message('info', 'User {username} logged in successfully', ['username' => $user['username']]);
+
+            // Set flash message
+            session()->setFlashdata('success', 'Berhasil login! Selamat datang ' . $user['nama']);
+            
+            return redirect()->to('/dashboard');
+        }
+
+        // Jika login gagal
+        log_message('notice', 'Failed login attempt for username: {username}', ['username' => $username]);
+        return redirect()->back()
+            ->with('error', 'Username atau password salah.')
+            ->withInput();
     }
-}
 
-public function logout()
-{
-    // Hapus semua data sesi
-    session()->destroy();
+    public function logout()
+    {
+        // Log aktivitas logout (opsional)
+        if (session()->get('username')) {
+            log_message('info', 'User {username} logged out', ['username' => session()->get('username')]);
+        }
 
-    // Arahkan kembali ke halaman login
-    return redirect()->to('/login');
-}
+        // Hapus semua data sesi
+        session()->destroy();
 
+        // Set flash message
+        session()->setFlashdata('success', 'Berhasil logout!');
+
+        // Arahkan kembali ke halaman login
+        return redirect()->to('/login');
+    }
 }

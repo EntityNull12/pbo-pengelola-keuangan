@@ -1,6 +1,7 @@
 <h3 class="font-bold text-center my-12 text-6xl">Selamat Datang</h3>
 
 <form class="max-w-2xl mx-auto" method="post" action="<?= base_url('login/authenticate') ?>">
+<?= csrf_field() ?>
   <div class="mb-5">
     <label for="username" class="block mb-2 text-lg font-semibold">Username</label>
     <input type="text" id="username" name="username" class="bg-transparent border border-yellow-200 text-yellow-200 text-lg rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5 " placeholder="John Doe" required />

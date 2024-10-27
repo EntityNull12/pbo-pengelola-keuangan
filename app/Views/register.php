@@ -1,5 +1,6 @@
 <h3 class="font-bold text-center my-12 text-6xl">Pendaftaran</h3>
 <form class="max-w-2xl mx-auto mt-4" method="post" action="/register/save">
+<?= csrf_field() ?>
   <div class="mb-5">
     <label for="nama" class="block mb-2 text-lg font-semibold">Nama</label>
     <input type="text" name="nama" id="nama" class="bg-transparent border border-yellow-200 text-yellow-200 text-lg rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5 " placeholder="John Doe" required />

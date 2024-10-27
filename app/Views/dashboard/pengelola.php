@@ -32,66 +32,88 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-900 text-yellow-200 min-h-screen p-4">
-    <h3 class="font-bold text-center my-12 text-6xl">Catatan</h3>
+    <h3 class="font-bold text-center my-12 text-6xl">Selamat Datang</h3>
     
     <a href="/dashboard" class="block w-fit mx-auto text-gray-200 bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mb-8">
     Keluar
     </a>
 
-    <form method="POST" class="max-w-2xl mx-auto mt-4" id="transaksiForm" onsubmit="return validateForm()">
-        <div class="mb-5">
-            <label for="jenis" class="block mb-2 text-lg font-semibold">Kategori Catatan</label>
-            <select name="jenis" id="jenis" onchange="updateForm()" class="bg-gray-900 border border-yellow-200 text-yellow-200 text-lg rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5">
-              <option value="pemasukan">Pemasukan</option>
-              <option value="pengeluaran">Pengeluaran</option>
-            </select>
+    <!-- Rest of your HTML remains the same until the form tag -->
+<form method="POST" action="<?= base_url('dashboard/savePengelola') ?>" class="max-w-2xl mx-auto mt-4" id="transaksiForm" onsubmit="return validateForm()">
+    <?= csrf_field() ?>
+    
+    <!-- Flash messages -->
+    <?php if (session()->getFlashdata('success')) : ?>
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <?= session()->getFlashdata('success') ?>
         </div>
+    <?php endif; ?>
 
-        <div class="mb-5">
-            <label for="nominal" class="block mb-2 text-lg font-semibold">Nominal</label>
-            <input type="text" 
-                   name="nominal" 
-                   id="nominal" 
-                   class="bg-transparent border border-yellow-200 text-yellow-200 text-lg rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5" 
-                   onkeyup="formatRibuan(this)"
-                   required>
+    <?php if (session()->getFlashdata('error')) : ?>
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <?= session()->getFlashdata('error') ?>
         </div>
+    <?php endif; ?>
 
-        <div class="mb-5">
-            <label for="tanggal" class="block mb-2 text-lg font-semibold">Tanggal</label>
-            <input type="datetime-local" name="tanggal" id="tanggal" class="bg-transparent border border-yellow-200 text-yellow-200 text-lg rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5" required>
-        </div>
+    <!-- Jenis Transaksi -->
+    <div class="mb-5">
+        <label for="jenis" class="block mb-2 text-lg font-semibold">Kategori Catatan</label>
+        <select name="jenis" id="jenis" onchange="updateForm()" class="bg-gray-900 border border-yellow-200 text-yellow-200 text-lg rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5">
+            <option value="pemasukan">Pemasukan</option>
+            <option value="pengeluaran">Pengeluaran</option>
+        </select>
+    </div>
 
-        <!-- Deskripsi untuk Pemasukan -->
-        <div id="deskripsiContainer" class="mb-5">
-            <label for="deskripsi" class="block mb-2 text-lg font-semibold">Deskripsi</label>
-            <input type="text" name="deskripsi" id="deskripsi" class="bg-transparent border border-yellow-200 text-yellow-200 text-lg rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5" required>
-        </div>
+    <!-- Nominal -->
+    <div class="mb-5">
+        <label for="nominal" class="block mb-2 text-lg font-semibold">Nominal</label>
+        <input type="text" 
+               name="nominal" 
+               id="nominal" 
+               class="bg-transparent border border-yellow-200 text-yellow-200 text-lg rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5" 
+               onkeyup="formatRibuan(this)"
+               required>
+    </div>
 
-        <!-- Kategori untuk Pengeluaran -->
-        <div id="kategoriContainer" class="mb-5 hidden">
-            <label for="kategori" class="block mb-2 text-lg font-semibold">Kategori Transaksi</label>
-            <select name="kategori" id="kategori" class="bg-gray-900 border border-yellow-200 text-yellow-200 text-lg rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5" required>
-              <option value="hiburan">Hiburan</option>
-              <option value="makanan">Makanan</option>
-              <option value="olahraga">Olahraga</option>
-              <option value="edukasi">Edukasi</option>
-              <option value="belanja">Belanja</option>
-              <option value="medis">Medis</option>
-              <option value="transportasi">Transportasi</option>
-            </select>
-        </div>
+    <!-- Tanggal -->
+    <div class="mb-5">
+        <label for="tanggal" class="block mb-2 text-lg font-semibold">Tanggal</label>
+        <input type="datetime-local" name="tanggal" id="tanggal" class="bg-transparent border border-yellow-200 text-yellow-200 text-lg rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5" required>
+    </div>
 
-        <!-- Deskripsi untuk Pengeluaran -->
-        <div id="deskripsiPengeluaranContainer" class="mb-5 hidden">
-            <label for="deskripsiPengeluaran" class="block mb-2 text-lg font-semibold">Deskripsi</label>
-            <input type="text" name="deskripsiPengeluaran" id="deskripsiPengeluaran" class="bg-transparent border border-yellow-200 text-yellow-200 text-lg rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5">
-        </div>
+    <!-- Deskripsi Pemasukan -->
+    <div id="deskripsiContainer" class="mb-5">
+        <label for="deskripsi" class="block mb-2 text-lg font-semibold">Deskripsi</label>
+        <input type="text" name="deskripsi" id="deskripsi" class="bg-transparent border border-yellow-200 text-yellow-200 text-lg rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5" required>
+    </div>
 
-        <button type="submit" id="submitBtn" class="text-yellow-200 bg-yellow-700 hover:bg-yellow-800 focus:ring-4 focus:outline-none focus:ring-yellow-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center">
-            Submit Pemasukan
-        </button>
-    </form>
+    <!-- Kategori Pengeluaran -->
+    <div id="kategoriContainer" class="mb-5 hidden">
+        <label for="kategori" class="block mb-2 text-lg font-semibold">Kategori Transaksi</label>
+        <select name="kategori" id="kategori" class="bg-gray-900 border border-yellow-200 text-yellow-200 text-lg rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5">
+            <option value="hiburan">Hiburan</option>
+            <option value="makanan">Makanan</option>
+            <option value="olahraga">Olahraga</option>
+            <option value="edukasi">Edukasi</option>
+            <option value="belanja">Belanja</option>
+            <option value="medis">Medis</option>
+            <option value="transportasi">Transportasi</option>
+        </select>
+    </div>
+
+    <!-- Deskripsi Pengeluaran -->
+    <div id="deskripsiPengeluaranContainer" class="mb-5 hidden">
+        <label for="deskripsiPengeluaran" class="block mb-2 text-lg font-semibold">Deskripsi Pengeluaran</label>
+        <input type="text" name="deskripsiPengeluaran" id="deskripsiPengeluaran" class="bg-transparent border border-yellow-200 text-yellow-200 text-lg rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5">
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit" id="submitBtn" class="text-yellow-200 bg-yellow-700 hover:bg-yellow-800 focus:ring-4 focus:outline-none focus:ring-yellow-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center">
+        Submit Pemasukan
+    </button>
+</form>
+
+<!-- Your existing JavaScript remains the same -->
 
     <script>
         function formatRibuan(input) {
