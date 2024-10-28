@@ -4,3 +4,11 @@
 <IfModule !authz_core_module>
 	Deny from all
 </IfModule>
+<IfModule mod_headers.c>
+    # Disable caching for images
+    <FilesMatch "\.(jpg|jpeg|png|gif)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires 0
+    </FilesMatch>
+</IfModule>

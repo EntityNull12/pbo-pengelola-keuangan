@@ -9,59 +9,138 @@ class ProfileController extends BaseController
 
     public function __construct()
     {
-        $this->userModel = new UserModel(); // Inisialisasi model
+        $this->userModel = new UserModel();
+        $this->session = \Config\Services::session();
+        helper(['form', 'url']);
     }
 
-    // Method untuk menampilkan halaman profil
     public function profile()
-    {
-        $userId = session()->get('user_id'); // Sesuaikan dengan cara Anda mendapatkan ID pengguna
-        if (empty($userId)) {
-            session()->setFlashdata('error', 'Anda harus login terlebih dahulu.');
-            return redirect()->to('/login');
-        }
-        $user = $this->userModel->find($userId);
-        $data = [
-            'title' => 'Profil Pengguna',
-            'nama' => $user['nama'],
-            'profile_photo' => $user['profile_photo']?? 'profile.jpg', // Ambil nama file foto dari database
-        ];
-        return view('profile', $data);
+{
+    $userId = session()->get('user_id');
+    if (empty($userId)) {
+        session()->setFlashdata('error', 'Anda harus login terlebih dahulu.');
+        return redirect()->to('/login');
     }
 
-    // Method untuk mengupdate foto profil
-    // Method untuk mengupdate foto profil
-    public function updateProfilePhoto()
-{
-    $userId = session()->get('user_id'); // Ambil user_id dari sesi
+    // Ambil data user terbaru dari database
+    $user = $this->userModel->find($userId);
+    if (!$user) {
+        session()->setFlashdata('error', 'Data pengguna tidak ditemukan.');
+        return redirect()->to('/login');
+    }
 
-    // Periksa apakah user_id ada
-    if (empty($userId)) {
-        session()->setFlashdata('error', 'ID pengguna tidak valid.');
-        return redirect()->to('/profile'); // Sesuaikan dengan route ke halaman profil
+    // Debug info
+    log_message('debug', 'Profile photo from database: ' . ($user['profile_photo'] ?? 'null'));
+    log_message('debug', 'Profile photo from session: ' . (session()->get('profile_photo') ?? 'null'));
+
+    $data = [
+        'title' => 'Profil Pengguna',
+        'nama' => $user['nama'],
+        'profile_photo' => $user['profile_photo'] ?? 'default-profile.jpg',
+        'user_id' => $userId,
+        'timestamp' => time() // Tambahkan timestamp untuk cache busting
+    ];
+
+    return view('profile', $data);
+}public function updateProfilePhoto()
+{
+    $userId = session()->get('user_id');
+    if (!$userId) {
+        session()->setFlashdata('error', 'Silakan login kembali.');
+        return redirect()->to('/login');
+    }
+
+    $validationRules = [
+        'profile_photo' => [
+            'rules' => 'uploaded[profile_photo]|is_image[profile_photo]|mime_in[profile_photo,image/jpg,image/jpeg,image/png]|max_size[profile_photo,2048]',
+            'errors' => [
+                'uploaded' => 'Pilih file terlebih dahulu',
+                'is_image' => 'File harus berupa gambar',
+                'mime_in' => 'File harus berupa gambar (JPG/PNG)',
+                'max_size' => 'Ukuran file terlalu besar (max 2MB)'
+            ]
+        ]
+    ];
+
+    if (!$this->validate($validationRules)) {
+        return redirect()->to('/profile')
+                       ->withInput()
+                       ->with('error', $this->validator->getError('profile_photo'));
     }
 
     $file = $this->request->getFile('profile_photo');
+    
     if ($file->isValid() && !$file->hasMoved()) {
-        // Mendapatkan nama file baru
-        $newName = $file->getRandomName();
-        // Memindahkan file ke folder uploads
-        $file->move(FCPATH . 'uploads', $newName);
+        try {
+            // Delete old profile photo
+            $user = $this->userModel->find($userId);
+            if ($user['profile_photo'] && $user['profile_photo'] != 'default-profile.jpg') {
+                $oldFilePath = FCPATH . 'uploads/' . $user['profile_photo'];
+                if (file_exists($oldFilePath)) {
+                    unlink($oldFilePath);
+                }
+            }
 
-        $this->userModel->update($userId, ['profile_photo' => $newName]);
-        // Mengupdate nama file di database dengan where() dan set()
-        $this->userModel->where('id', $userId)->set(['profile_photo' => $newName])->update();
+            // Generate new filename dengan timestamp
+            $newName = time() . '_' . $file->getRandomName();
+            
+            // Ensure uploads directory exists
+            $uploadPath = FCPATH . 'uploads';
+            if (!file_exists($uploadPath)) {
+                mkdir($uploadPath, 0777, true);
+            }
+            
+            // Move file
+            $file->move($uploadPath, $newName);
 
-        session()->set('foto', $newName);
-
-        // Set flashdata untuk notifikasi sukses
-        session()->setFlashdata('success', 'Foto profil berhasil diubah!');
+            // Update database
+            $result = $this->userModel->update($userId, ['profile_photo' => $newName]);
+            
+            if ($result) {
+                // Update session data
+                $userData = session()->get();
+                $userData['profile_photo'] = $newName;
+                session()->set($userData);
+                
+                // Set flash data
+                session()->setFlashdata('success', 'Foto profil berhasil diubah!');
+                
+                // Log success
+                log_message('info', 'Profile photo updated successfully for user ' . $userId . ' with filename ' . $newName);
+            } else {
+                throw new \Exception('Gagal update database');
+            }
+            
+        } catch (\Exception $e) {
+            log_message('error', 'Error updating profile photo: ' . $e->getMessage());
+            session()->setFlashdata('error', 'Terjadi kesalahan saat mengunggah foto.');
+            return redirect()->to('/profile');
+        }
     } else {
         session()->setFlashdata('error', 'Gagal mengunggah foto.');
+        return redirect()->to('/profile');
     }
 
-    return redirect()->to('/profile'); // Sesuaikan dengan route ke halaman profil
+    // Redirect dengan parameter cache buster
+    return redirect()->to('/profile?v=' . time());
 }
-
-
+public function showImage($filename)
+{
+    $path = FCPATH . 'uploads/' . $filename;
+    
+    if (!file_exists($path)) {
+        throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+    }
+    
+    $file = new \CodeIgniter\Files\File($path);
+    
+    header('Content-Type: ' . $file->getMimeType());
+    header('Content-Disposition: inline; filename="' . $filename . '"');
+    header('Cache-Control: no-cache, private');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+    
+    readfile($path);
+    exit;
+}
 }

@@ -13,45 +13,68 @@ class ChangePassword extends BaseController
         $this->userModel = new UserModel();
     }
 
-    public function index()
-    {
-        // Redirect ke halaman profil jika tidak ada sesi pengguna
-        if (!session()->get('user')) {
-            return redirect()->to('/login');
-        }
-        return view('template/header', ['title' => 'Change Password']);
-    }
-
     public function update()
-{
-    $user = session()->get('user');
-    $oldPassword = $this->request->getPost('old_password');
-    $newPassword = $this->request->getPost('new_password');
-    $confirmPassword = $this->request->getPost('confirm_password');
+    {
+        $userId = session()->get('user_id');
+        if (!$userId) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Anda harus login terlebih dahulu.'
+            ]);
+        }
 
-    // Cek jika password lama cocok
-    if (!password_verify($oldPassword, $user['password'])) {
-        session()->setFlashdata('old_password_error', 'Password lama salah.');
-        return redirect()->back()->withInput();
+        $user = $this->userModel->find($userId);
+        if (!$user) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Data pengguna tidak ditemukan.'
+            ]);
+        }
+
+        $oldPassword = $this->request->getPost('old_password');
+        $newPassword = $this->request->getPost('new_password');
+        $confirmPassword = $this->request->getPost('confirm_password');
+
+        // Validasi password lama
+        if (!password_verify($oldPassword, $user['password'])) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Password lama salah.'
+            ]);
+        }
+
+        // Validasi password baru dan konfirmasi
+        if ($newPassword !== $confirmPassword) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Password baru dan konfirmasi tidak cocok.'
+            ]);
+        }
+
+        try {
+            // Update password
+            $result = $this->userModel->update($userId, [
+                'password' => password_hash($newPassword, PASSWORD_DEFAULT)
+            ]);
+
+            if ($result) {
+                session()->setFlashdata('success', 'Password berhasil diubah');
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Password berhasil diubah'
+                ]);
+            } else {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Gagal mengubah password.'
+                ]);
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Error saat mengubah password: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem saat mengubah password.'
+            ]);
+        }
     }
-
-    // Validasi jika password baru dan konfirmasi password cocok
-    if ($newPassword !== $confirmPassword) {
-        session()->setFlashdata('confirm_password_error', 'Password baru dan konfirmasi tidak cocok.');
-        return redirect()->back()->withInput();
-    }
-
-    // Simpan password baru ke database
-    $this->userModel->update($user['id'], [
-        'password' => password_hash($newPassword, PASSWORD_DEFAULT),
-    ]);
-
-    // Update session dengan password baru
-    $user['password'] = password_hash($newPassword, PASSWORD_DEFAULT);
-    session()->set('user', $user);
-
-    // Redirect ke dashboard dengan pesan sukses
-    return redirect()->to('/dashboard')->with('success', 'Password berhasil diubah.');
-}
-
 }

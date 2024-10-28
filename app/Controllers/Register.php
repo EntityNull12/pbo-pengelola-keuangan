@@ -15,12 +15,23 @@ class Register extends BaseController
 
     public function index()
     {
+        // Debugging - cek status session
+        log_message('debug', 'Session status: ' . (session()->get('logged_in') ? 'logged in' : 'not logged in'));
+        
+        // Jika user sudah login, redirect ke dashboard
+        if (session()->get('logged_in')) {
+            log_message('debug', 'User sudah login, redirect ke dashboard');
+            return redirect()->to('/dashboard');
+        }
+
+        // Jika belum login, tampilkan halaman register
         $data = [
             'title' => 'Daftar'
         ];
-        echo view('template/header', $data);
-        echo view('register');
-        echo view('template/footer');
+        
+        return view('template/header', $data)
+             . view('register')
+             . view('template/footer');
     }
 
     public function save()

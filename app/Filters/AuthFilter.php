@@ -10,15 +10,15 @@ class AuthFilter implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
-        // Jika user belum login
-        if (!session()->get('user_id')) {
-            // Maka redirect ke halaman login
-            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        if (!session()->get('logged_in')) {
+            // Jika mencoba mengakses halaman yang butuh auth
+            session()->setFlashdata('error', 'Silakan login terlebih dahulu.');
+            return redirect()->to('/login');
         }
     }
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        // Do nothing
+        // Tidak ada operasi yang diperlukan setelah request
     }
 }

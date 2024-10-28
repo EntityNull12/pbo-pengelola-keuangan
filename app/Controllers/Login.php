@@ -58,7 +58,7 @@ class Login extends BaseController
                 'user_id'    => $user['id'],            // untuk identifikasi user
                 'username'   => $user['username'],      // untuk tampilan
                 'nama'       => $user['nama'],          // untuk tampilan
-                'foto'       => $user['profile_photo'], // untuk tampilan
+                'foto'       => $user['profile_photo'] ?? 'default-profile.jpg', // untuk tampilan
                 'logged_in'  => true                    // untuk cek status login
             ];
             
