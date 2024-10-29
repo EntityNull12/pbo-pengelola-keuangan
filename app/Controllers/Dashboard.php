@@ -21,33 +21,40 @@ class Dashboard extends BaseController
         if (!session()->get('user_id')) {
             return redirect()->to('/login');
         }
-
+    
         // Ambil data untuk dashboard
         $startDate = date('Y-m-01'); // Awal bulan ini
         $endDate = date('Y-m-t');    // Akhir bulan ini
-
+    
         // Hitung total pemasukan, pengeluaran, dan saldo berdasarkan user yang login
         $user_id = session()->get('user_id');
+        
+        // Ambil data transaksi sesuai filter
+        $recentTransactions = $this->pengelolaModel->getFilteredTransactions(
+            $user_id,
+            null, // jenis transaksi (null untuk semua)
+            $startDate,
+            $endDate
+        );
+    
+        // Hitung total berdasarkan user yang login
         $totalPemasukan = $this->pengelolaModel->getTotalPemasukan($startDate, $endDate);
         $totalPengeluaran = $this->pengelolaModel->getTotalPengeluaran($startDate, $endDate);
         $saldo = $totalPemasukan - $totalPengeluaran;
-
-        // Ambil riwayat transaksi terbaru untuk user yang login
-        $recentTransactions = $this->pengelolaModel->getRiwayat($startDate, $endDate);
-
+    
         // Data yang akan dikirim ke view
         $data = [
             'title' => 'Dashboard',
             'user' => session()->get('nama'),
+            'saldo' => $saldo,
             'total_pemasukan' => $totalPemasukan,
             'total_pengeluaran' => $totalPengeluaran,
-            'saldo' => $saldo,
             'recent_transactions' => $recentTransactions
         ];
-
-        // Load view - perbaikan path view sesuai dengan struktur folder
+    
+        // Load view
         return view('template/header', $data)
-            . view('dashboard/dashboard', $data)  // Diubah ke dashboard/dashboard
+            . view('dashboard/dashboard', $data)
             . view('template/footer');
     }
 

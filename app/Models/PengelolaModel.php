@@ -49,30 +49,30 @@ class PengelolaModel extends Model
 
     // Add the missing getFilteredTransactions method
     public function getFilteredTransactions($userId, $jenis = null, $startDate = null, $endDate = null)
-    {
-        $builder = $this->builder();
-        
-        // Filter berdasarkan user ID
-        $builder->where('pengelola', $userId);
-        
-        // Filter berdasarkan jenis transaksi
-        if ($jenis && $jenis !== 'semua') {
-            $builder->where('tipe_catatan', $jenis);
-        }
-        
-        // Filter berdasarkan tanggal
-        if ($startDate) {
-            $builder->where('DATE(tanggal) >=', $startDate);
-        }
-        if ($endDate) {
-            $builder->where('DATE(tanggal) <=', $endDate);
-        }
-
-        // Urutkan berdasarkan tanggal terbaru
-        $builder->orderBy('tanggal', 'DESC');
-
-        return $builder->get()->getResultArray();
+{
+    $builder = $this->builder();
+    
+    // Filter berdasarkan user ID
+    $builder->where('pengelola', $userId);
+    
+    // Filter berdasarkan jenis transaksi
+    if ($jenis && $jenis !== 'semua') {
+        $builder->where('tipe_catatan', $jenis);
     }
+    
+    // Filter berdasarkan tanggal
+    if ($startDate) {
+        $builder->where('DATE(tanggal) >=', $startDate);
+    }
+    if ($endDate) {
+        $builder->where('DATE(tanggal) <=', $endDate);
+    }
+
+    // Urutkan berdasarkan tanggal terbaru
+    $builder->orderBy('tanggal', 'DESC');
+
+    return $builder->get()->getResultArray();
+}
 
     // Existing methods remain the same
     public function getTotalPemasukan($startDate = null, $endDate = null)

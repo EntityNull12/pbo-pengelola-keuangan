@@ -1,3 +1,4 @@
+<!-- Navigation -->
 <nav class="bg-gray-800 p-4">
     <div class="container mx-auto flex justify-between items-center">
         <div class="text-white text-lg font-bold text-3xl">Dashboard</div>
@@ -18,30 +19,113 @@
     </div>
 </nav>
 
-<h6 class="font-medium text-lg mt-8 mb-4 text-center">Uang saat ini</h6>
-<h5 class="font-bold text-5xl text-center">Rp300.000</h5>
+<!-- Balance Display with Neon Effect -->
+<div id="neon-balance-root"></div>
 
-<a href="/dashboard/pengelola" class="text-yellow-200 bg-yellow-700 hover:bg-yellow-800 focus:ring-4 focus:outline-none focus:ring-yellow-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center">Catatan</a>
-<a href="/dashboard/riwayat" class="text-yellow-200 bg-yellow-700 hover:bg-yellow-800 focus:ring-4 focus:outline-none focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+<!-- Action Buttons -->
+<div class="flex justify-center gap-4 mt-6">
+    <a href="/dashboard/pengelola" class="text-yellow-200 bg-yellow-700 hover:bg-yellow-800 focus:ring-4 focus:outline-none focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+        Catatan
+    </a>
+    <a href="/dashboard/riwayat" class="text-yellow-200 bg-yellow-700 hover:bg-yellow-800 focus:ring-4 focus:outline-none focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
         Riwayat Catatan
     </a>
+</div>
 
-
-
+<!-- Chart Container -->
 <div id="chartContainer" class="mt-6" style="height: 370px; width: 100%;"></div>
 
-<!-- Script to toggle the dropdown -->
+<!-- Required Scripts -->
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+<!-- Neon Balance Component -->
 <script>
-    const menuButton = document.getElementById('menu-button');
-    const menuDropdown = document.getElementById('menu-dropdown');
+const NeonBalanceDisplay = ({ saldo = 0 }) => {
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('id-ID').format(amount);
+    };
 
-    menuButton.addEventListener('click', () => {
-        menuDropdown.classList.toggle('hidden');
-    });
+    return React.createElement(
+        'div',
+        { className: 'flex flex-col items-center gap-4 py-8' },
+        [
+            React.createElement(
+                'h6',
+                { 
+                    className: 'font-medium text-lg text-yellow-200',
+                    key: 'title'
+                },
+                'Uang saat ini'
+            ),
+            React.createElement(
+                'div',
+                { 
+                    className: 'relative',
+                    key: 'balance-container'
+                },
+                React.createElement(
+                    'div',
+                    {
+                        className: 'font-bold text-5xl text-yellow-200 animate-pulse relative'
+                    },
+                    [
+                        React.createElement(
+                            'span',
+                            {
+                                className: 'relative z-10',
+                                key: 'main-text'
+                            },
+                            `Rp ${formatCurrency(saldo)}`
+                        ),
+                        React.createElement(
+                            'span',
+                            {
+                                className: 'absolute inset-0 text-yellow-200 blur-sm',
+                                key: 'glow-1'
+                            },
+                            `Rp ${formatCurrency(saldo)}`
+                        ),
+                        React.createElement(
+                            'span',
+                            {
+                                className: 'absolute inset-0 text-yellow-200 blur-md',
+                                key: 'glow-2'
+                            },
+                            `Rp ${formatCurrency(saldo)}`
+                        ),
+                        React.createElement(
+                            'span',
+                            {
+                                className: 'absolute inset-0 text-yellow-200 blur-lg opacity-50',
+                                key: 'glow-3'
+                            },
+                            `Rp ${formatCurrency(saldo)}`
+                        )
+                    ]
+                )
+            )
+        ]
+    );
+};
 
-    window.addEventListener('click', (e) => {
-        if (!menuButton.contains(e.target) && !menuDropdown.contains(e.target)) {
-            menuDropdown.classList.add('hidden');
-        }
-    });
+// Initialize the React component with the saldo from PHP
+const saldo = <?= $saldo ?? 0 ?>;
+const balanceRoot = document.getElementById('neon-balance-root');
+const root = ReactDOM.createRoot(balanceRoot);
+root.render(React.createElement(NeonBalanceDisplay, { saldo: saldo }));
+
+// Dropdown menu functionality
+const menuButton = document.getElementById('menu-button');
+const menuDropdown = document.getElementById('menu-dropdown');
+
+menuButton.addEventListener('click', () => {
+    menuDropdown.classList.toggle('hidden');
+});
+
+window.addEventListener('click', (e) => {
+    if (!menuButton.contains(e.target) && !menuDropdown.contains(e.target)) {
+        menuDropdown.classList.add('hidden');
+    }
+});
 </script>
