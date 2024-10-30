@@ -31,5 +31,5 @@ $routes->group('', ['filter' => 'auth'], function($routes) {
 });
 
 // Public Routes
-$routes->get('/', 'Home::index');
+$routes->get('/', 'About::about');
 $routes->get('/about', 'About::about');

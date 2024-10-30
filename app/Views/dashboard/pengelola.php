@@ -34,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body class="bg-gray-900 text-yellow-200 min-h-screen p-4">
     <h3 class="font-bold text-center my-12 text-6xl">Selamat Datang</h3>
     
-    <a href="/dashboard" class="block w-fit mx-auto text-gray-200 bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mb-8">
+    <a href="/dashboard" class="block w-fit ml-12 text-gray-200 bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-left mb-8">
     Keluar
     </a>
 
@@ -78,7 +78,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <!-- Tanggal -->
     <div class="mb-5">
         <label for="tanggal" class="block mb-2 text-lg font-semibold">Tanggal</label>
-        <input type="datetime-local" name="tanggal" id="tanggal" class="bg-transparent border border-yellow-200 text-yellow-200 text-lg rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5" required>
+        <input type="datetime-local" name="tanggal" id="tanggal" data-date-format="DD/MMM/YYYY" min="2015-06-01T08:30"
+        max="2099-06-30T16:30" class="tm bg-transparent border border-yellow-200 text-yellow-200 text-lg rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5" required>
     </div>
 
     <!-- Deskripsi Pemasukan -->
@@ -114,6 +115,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </form>
 
 <!-- Your existing JavaScript remains the same -->
+<script>
+    
+    const date = new Date(this.value);
+    const day = ("0" + date.getDate()).slice(-2);  // memastikan 2 digit
+    const month = ("0" + (date.getMonth() + 1)).slice(-2);  // memastikan 2 digit
+    const year = date.getFullYear();
+    const hours = ("0" + date.getHours()).slice(-2);  // memastikan 2 digit
+    const minutes = ("0" + date.getMinutes()).slice(-2);  // memastikan 2 digit
+    const formattedDateTime = `${day}/${month}/${year}, ${hours}:${minutes}`;
+    console.log(formattedDateTime);  // Cek format di konsol atau tampilkan ke elemen
+});
+</script>
 
     <script>
         function formatRibuan(input) {

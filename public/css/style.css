@@ -1,1 +1,4 @@
 /* syntax css disini */
+html{
+    scroll-behavior: smooth;
+}

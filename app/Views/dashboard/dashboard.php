@@ -14,6 +14,7 @@
             <div id="menu-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg z-10">
                 <a href="/about" class="block px-4 py-2 text-yellow-200 hover:bg-yellow-700 hover:text-white rounded-t-lg">About</a>
                 <a href="/profile" class="block px-4 py-2 text-yellow-200 hover:bg-yellow-700 hover:text-white">Profile</a>
+                <a href="/logout" class="block px-4 py-2 text-yellow-200 hover:bg-yellow-700 hover:text-white">Logout</a>
             </div>
         </div>
     </div>

@@ -36,7 +36,7 @@ class ProfileController extends BaseController
     $data = [
         'title' => 'Profil Pengguna',
         'nama' => $user['nama'],
-        'profile_photo' => $user['profile_photo'] ?? 'default-profile.jpg',
+        'profile_photo' => $user['profile_photo'] ?? 'profile.jpg',
         'user_id' => $userId,
         'timestamp' => time() // Tambahkan timestamp untuk cache busting
     ];

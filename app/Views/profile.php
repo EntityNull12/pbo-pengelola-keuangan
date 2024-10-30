@@ -57,14 +57,14 @@
 
     <div class="container mx-auto py-12">
         <div class="bg-gray-900 rounded-lg shadow-lg p-6 text-center relative">
-            <button @click="open = !open" class="absolute top-4 right-4 text-white focus:outline-none">
+            <button @click="open = !open" class="absolute top-4 right-4  text-white focus:outline-none">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
                 </svg>
             </button>
             <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg z-10" x-transition>
-                <button @click="modalOpen = true" class="block px-4 py-2 text-sm hover:bg-indigo-600">Change Password</button>
-                <button @click="modalOpenProfilePhoto = true" class="block px-4 py-2 text-sm hover:bg-indigo-600">Change Profile Photo</button>
+                <button @click="modalOpen = true" class="block w-full text-left px-4 py-2 text-sm hover:bg-indigo-600">Change Password</button>
+                <button @click="modalOpenProfilePhoto = true" class="block w-full text-left px-4 py-2 text-sm hover:bg-indigo-600">Change Profile Photo</button>
                 <a href="/logout" class="block px-4 py-2 text-sm hover:bg-indigo-600">Logout</a>
             </div>
             
