@@ -34,14 +34,62 @@
 </div>
 
 <!-- Chart Container -->
-<div id="chartContainer" class="mt-6 max-w-2xl mx-auto" style="height: 370px;"></div>
+<canvas id="lineChart" class="mt-6 max-w-2xl mx-auto" style="height: 370px;"></canvas>
 
 <!-- Required Scripts -->
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- Neon Balance Component -->
 <script>
+// Data for the chart (replace these with your dynamic data)
+const labels = ['Hari 1', 'Hari 2', 'Hari 3', 'Hari 4', 'Hari 5']; // Example labels
+const incomeData = <?= json_encode($incomeData ?? [100000, 150000, 200000, 250000, 300000]) ?>; // Example income data
+const expenseData = <?= json_encode($expenseData ?? [50000, 75000, 120000, 60000, 90000]) ?>; // Example expense data
+
+// Initialize the line chart
+const ctx = document.getElementById('lineChart').getContext('2d');
+const lineChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [
+            {
+                label: 'Pemasukan',
+                data: incomeData,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: true,
+            },
+            {
+                label: 'Pengeluaran',
+                data: expenseData,
+                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                fill: true,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+            title: {
+                display: true,
+                text: 'Rekap Pemasukan dan Pengeluaran'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Neon Balance Component
 const NeonBalanceDisplay = ({ saldo = 0 }) => {
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('id-ID').format(amount);
