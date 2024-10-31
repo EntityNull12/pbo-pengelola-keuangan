@@ -34,7 +34,7 @@
 </div>
 
 <!-- Chart Container -->
-<div id="chartContainer" class="mt-6" style="height: 370px; width: 100%;"></div>
+<div id="chartContainer" class="mt-6 max-w-2xl mx-auto" style="height: 370px;"></div>
 
 <!-- Required Scripts -->
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>

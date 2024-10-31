@@ -93,11 +93,11 @@
                         </td>
                         <td class="px-6 py-4">
                             <button onclick="editTransaksi(<?= $transaction['id'] ?>)" 
-                                    class="font-medium text-blue-500 hover:underline me-3">
+                                    class="focus:outline-none text-white bg-yellow-700 hover:bg-yellow-800 focus:ring-4 focus:ring-yellow-600 font-medium rounded-lg text-sm px-5 py-2.5 me-3 mb-2">
                                 Edit
                             </button>
                             <button onclick="hapusTransaksi(<?= $transaction['id'] ?>)" 
-                                    class="font-medium text-red-500 hover:underline">
+                                    class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">
                                 Hapus
                             </button>
                         </td>
