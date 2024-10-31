@@ -28,6 +28,7 @@ $routes->group('', ['filter' => 'auth'], function($routes) {
     $routes->get('/profile', 'ProfileController::profile');
     $routes->post('/change-password', 'ChangePassword::update');
     $routes->post('/profile-photo/update', 'ProfileController::updateProfilePhoto');
+    $routes->post('/update-bio', 'ProfileController::updateBio');
 });
 
 // Public Routes
