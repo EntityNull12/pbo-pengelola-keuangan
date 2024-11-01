@@ -16,6 +16,7 @@ $routes->get('/logout', 'Login::logout');
 // Dashboard & Protected Routes - Letakkan SETELAH routes auth
 $routes->group('', ['filter' => 'auth'], function($routes) {
     $routes->get('/dashboard', 'Dashboard::index');
+    $routes->get('dashboard/getChartData', 'Dashboard::getChartData');
     $routes->get('/dashboard/pengelola', 'Dashboard::pengelola');
     $routes->post('/dashboard/savePengelola', 'Dashboard::savePengelola');
     $routes->get('/dashboard/riwayat', 'Dashboard::riwayat');

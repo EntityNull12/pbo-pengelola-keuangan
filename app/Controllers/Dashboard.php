@@ -32,12 +32,40 @@ class Dashboard extends BaseController
         // Ambil data transaksi sesuai filter
         $recentTransactions = $this->pengelolaModel->getFilteredTransactions(
             $user_id,
-            null, // jenis transaksi (null untuk semua)
+            null,
             $startDate,
             $endDate
         );
     
-        // Hitung total berdasarkan user yang login
+        // Kelompokkan data transaksi per tanggal untuk chart
+        $chartData = [];
+        foreach ($recentTransactions as $transaction) {
+            $date = date('Y-m-d', strtotime($transaction['tanggal']));
+            if (!isset($chartData[$date])) {
+                $chartData[$date] = [
+                    'pemasukan' => 0,
+                    'pengeluaran' => 0,
+                    'transaksi' => []
+                ];
+            }
+            if ($transaction['tipe_catatan'] === 'pemasukan') {
+                $chartData[$date]['pemasukan'] += (float)$transaction['jumlah'];
+            } else {
+                $chartData[$date]['pengeluaran'] += (float)$transaction['jumlah'];
+            }
+            // Tambahkan detail transaksi
+            $chartData[$date]['transaksi'][] = [
+                'tipe' => $transaction['tipe_catatan'],
+                'jumlah' => (float)$transaction['jumlah'],
+                'deskripsi' => $transaction['deskripsi'],
+                'kategori' => $transaction['kategori_transaksi'] ?? '-'
+            ];
+        }
+    
+        // Urutkan data berdasarkan tanggal
+        ksort($chartData);
+    
+        // Hitung total
         $totalPemasukan = $this->pengelolaModel->getTotalPemasukan($startDate, $endDate);
         $totalPengeluaran = $this->pengelolaModel->getTotalPengeluaran($startDate, $endDate);
         $saldo = $totalPemasukan - $totalPengeluaran;
@@ -49,7 +77,14 @@ class Dashboard extends BaseController
             'saldo' => $saldo,
             'total_pemasukan' => $totalPemasukan,
             'total_pengeluaran' => $totalPengeluaran,
-            'recent_transactions' => $recentTransactions
+            'recent_transactions' => $recentTransactions,
+            // Data untuk chart
+            'chartData' => [
+                'labels' => array_keys($chartData),
+                'incomeData' => array_column($chartData, 'pemasukan'),
+                'expenseData' => array_column($chartData, 'pengeluaran'),
+                'transactions' => $chartData
+            ]
         ];
     
         // Load view
@@ -57,6 +92,8 @@ class Dashboard extends BaseController
             . view('dashboard/dashboard', $data)
             . view('template/footer');
     }
+
+    
 
     public function pengelola()
     {
@@ -276,4 +313,86 @@ class Dashboard extends BaseController
             'message' => 'Gagal memperbarui transaksi'
         ]);
     }
+    public function getChartData()
+{
+    $filterType = $this->request->getGet('type');
+    $user_id = session()->get('user_id');
+
+    switch($filterType) {
+        case 'harian':
+            $bulan = $this->request->getGet('bulan');
+            $tahun = $this->request->getGet('tahun');
+            $startDate = "$tahun-$bulan-01";
+            $endDate = date('Y-m-t', strtotime($startDate));
+            break;
+            
+        case 'bulanan':
+            $tahun = $this->request->getGet('tahun');
+            $startDate = "$tahun-01-01";
+            $endDate = "$tahun-12-31";
+            break;
+            
+        case 'tahunan':
+            // Ambil data beberapa tahun terakhir
+            $startDate = '2000-01-01';
+            $endDate = '2029-12-31';
+            break;
+            
+        default:
+            $startDate = date('Y-m-d');
+            $endDate = date('Y-m-d');
+    }
+
+    $transactions = $this->pengelolaModel->getFilteredTransactions(
+        $user_id,
+        null,
+        $startDate,
+        $endDate
+    );
+
+    // Proses data sesuai tipe filter
+    $chartData = [];
+    foreach ($transactions as $transaction) {
+        $date = date('Y-m-d', strtotime($transaction['tanggal']));
+        
+        // Sesuaikan pengelompokan berdasarkan tipe filter
+        $groupKey = $date;
+        if ($filterType === 'bulanan') {
+            $groupKey = date('Y-m', strtotime($date));
+        } else if ($filterType === 'tahunan') {
+            $groupKey = date('Y', strtotime($date));
+        }
+
+        if (!isset($chartData[$groupKey])) {
+            $chartData[$groupKey] = [
+                'pemasukan' => 0,
+                'pengeluaran' => 0,
+                'transaksi' => []
+            ];
+        }
+        
+        if ($transaction['tipe_catatan'] === 'pemasukan') {
+            $chartData[$groupKey]['pemasukan'] += (float)$transaction['jumlah'];
+        } else {
+            $chartData[$groupKey]['pengeluaran'] += (float)$transaction['jumlah'];
+        }
+        
+        $chartData[$groupKey]['transaksi'][] = [
+            'tipe' => $transaction['tipe_catatan'],
+            'jumlah' => (float)$transaction['jumlah'],
+            'deskripsi' => $transaction['deskripsi'],
+            'kategori' => $transaction['kategori_transaksi'] ?? '-'
+        ];
+    }
+
+    ksort($chartData);
+
+    return $this->response->setJSON([
+        'labels' => array_keys($chartData),
+        'incomeData' => array_column($chartData, 'pemasukan'),
+        'expenseData' => array_column($chartData, 'pengeluaran'),
+        'transactions' => $chartData,
+        'filterType' => $filterType
+    ]);
+}
 }
