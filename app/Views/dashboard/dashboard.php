@@ -397,7 +397,7 @@ document.getElementById('reset-zoom').addEventListener('click', () => {
     lineChart.resetZoom();
 });
 
-// Neon Balance Component
+// Replace the existing NeonBalanceDisplay component with this updated version:
 const NeonBalanceDisplay = ({ saldo = 0 }) => {
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('id-ID').format(amount);
@@ -413,7 +413,7 @@ const NeonBalanceDisplay = ({ saldo = 0 }) => {
                     className: 'font-medium text-lg text-yellow-200',
                     key: 'title'
                 },
-                'Uang saat ini'
+                'Uang Anda'
             ),
             React.createElement(
                 'div',

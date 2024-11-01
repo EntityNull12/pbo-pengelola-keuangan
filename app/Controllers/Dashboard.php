@@ -15,84 +15,100 @@ class Dashboard extends BaseController
         $this->session = \Config\Services::session();
     }
 
-    public function index()
-    {
-        // Cek apakah user sudah login
-        if (!session()->get('user_id')) {
-            return redirect()->to('/login');
-        }
-    
-        // Ambil data untuk dashboard
-        $startDate = date('Y-m-01'); // Awal bulan ini
-        $endDate = date('Y-m-t');    // Akhir bulan ini
-    
-        // Hitung total pemasukan, pengeluaran, dan saldo berdasarkan user yang login
-        $user_id = session()->get('user_id');
-        
-        // Ambil data transaksi sesuai filter
-        $recentTransactions = $this->pengelolaModel->getFilteredTransactions(
-            $user_id,
-            null,
-            $startDate,
-            $endDate
-        );
-    
-        // Kelompokkan data transaksi per tanggal untuk chart
-        $chartData = [];
-        foreach ($recentTransactions as $transaction) {
-            $date = date('Y-m-d', strtotime($transaction['tanggal']));
-            if (!isset($chartData[$date])) {
-                $chartData[$date] = [
-                    'pemasukan' => 0,
-                    'pengeluaran' => 0,
-                    'transaksi' => []
-                ];
-            }
-            if ($transaction['tipe_catatan'] === 'pemasukan') {
-                $chartData[$date]['pemasukan'] += (float)$transaction['jumlah'];
-            } else {
-                $chartData[$date]['pengeluaran'] += (float)$transaction['jumlah'];
-            }
-            // Tambahkan detail transaksi
-            $chartData[$date]['transaksi'][] = [
-                'tipe' => $transaction['tipe_catatan'],
-                'jumlah' => (float)$transaction['jumlah'],
-                'deskripsi' => $transaction['deskripsi'],
-                'kategori' => $transaction['kategori_transaksi'] ?? '-'
-            ];
-        }
-    
-        // Urutkan data berdasarkan tanggal
-        ksort($chartData);
-    
-        // Hitung total
-        $totalPemasukan = $this->pengelolaModel->getTotalPemasukan($startDate, $endDate);
-        $totalPengeluaran = $this->pengelolaModel->getTotalPengeluaran($startDate, $endDate);
-        $saldo = $totalPemasukan - $totalPengeluaran;
-    
-        // Data yang akan dikirim ke view
-        $data = [
-            'title' => 'Dashboard',
-            'user' => session()->get('nama'),
-            'saldo' => $saldo,
-            'total_pemasukan' => $totalPemasukan,
-            'total_pengeluaran' => $totalPengeluaran,
-            'recent_transactions' => $recentTransactions,
-            // Data untuk chart
-            'chartData' => [
-                'labels' => array_keys($chartData),
-                'incomeData' => array_column($chartData, 'pemasukan'),
-                'expenseData' => array_column($chartData, 'pengeluaran'),
-                'transactions' => $chartData
-            ]
-        ];
-    
-        // Load view
-        return view('template/header', $data)
-            . view('dashboard/dashboard', $data)
-            . view('template/footer');
+    // In Dashboard.php, modify the index method:
+public function index()
+{
+    // Cek apakah user sudah login
+    if (!session()->get('user_id')) {
+        return redirect()->to('/login');
     }
 
+    // Ambil data untuk dashboard
+    $startDate = date('Y-m-01'); // Awal bulan ini
+    $endDate = date('Y-m-t');    // Akhir bulan ini
+    $currentDate = date('Y-m-d'); // Tanggal hari ini
+
+    // Ambil user_id dari session
+    $user_id = session()->get('user_id');
+    
+    // Ambil data transaksi sesuai filter
+    $recentTransactions = $this->pengelolaModel->getFilteredTransactions(
+        $user_id,
+        null,
+        $startDate,
+        $endDate
+    );
+
+    // Kelompokkan data transaksi per tanggal untuk chart
+    $chartData = [];
+    foreach ($recentTransactions as $transaction) {
+        $date = date('Y-m-d', strtotime($transaction['tanggal']));
+        if (!isset($chartData[$date])) {
+            $chartData[$date] = [
+                'pemasukan' => 0,
+                'pengeluaran' => 0,
+                'transaksi' => []
+            ];
+        }
+        if ($transaction['tipe_catatan'] === 'pemasukan') {
+            $chartData[$date]['pemasukan'] += (float)$transaction['jumlah'];
+        } else {
+            $chartData[$date]['pengeluaran'] += (float)$transaction['jumlah'];
+        }
+        $chartData[$date]['transaksi'][] = [
+            'tipe' => $transaction['tipe_catatan'],
+            'jumlah' => (float)$transaction['jumlah'],
+            'deskripsi' => $transaction['deskripsi'],
+            'kategori' => $transaction['kategori_transaksi'] ?? '-'
+        ];
+    }
+
+    // Urutkan data berdasarkan tanggal
+    ksort($chartData);
+
+    // Hitung total saldo dari semua transaksi hingga hari ini
+    $allTransactions = $this->pengelolaModel->getFilteredTransactions(
+        $user_id,
+        null,
+        '2000-01-01', // Tanggal awal yang cukup lampau
+        $currentDate  // Hanya hingga hari ini
+    );
+
+    $totalSaldo = 0;
+    foreach ($allTransactions as $transaction) {
+        if ($transaction['tipe_catatan'] === 'pemasukan') {
+            $totalSaldo += (float)$transaction['jumlah'];
+        } else {
+            $totalSaldo -= (float)$transaction['jumlah'];
+        }
+    }
+
+    // Hitung total bulan ini untuk statistik
+    $totalPemasukan = $this->pengelolaModel->getTotalPemasukan($startDate, $endDate);
+    $totalPengeluaran = $this->pengelolaModel->getTotalPengeluaran($startDate, $endDate);
+
+    // Data yang akan dikirim ke view
+    $data = [
+        'title' => 'Dashboard',
+        'user' => session()->get('nama'),
+        'saldo' => $totalSaldo,
+        'total_pemasukan' => $totalPemasukan,
+        'total_pengeluaran' => $totalPengeluaran,
+        'recent_transactions' => $recentTransactions,
+        // Data untuk chart
+        'chartData' => [
+            'labels' => array_keys($chartData),
+            'incomeData' => array_column($chartData, 'pemasukan'),
+            'expenseData' => array_column($chartData, 'pengeluaran'),
+            'transactions' => $chartData
+        ]
+    ];
+
+    // Load view
+    return view('template/header', $data)
+        . view('dashboard/dashboard', $data)
+        . view('template/footer');
+}
     
 
     public function pengelola()
