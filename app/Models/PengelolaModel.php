@@ -123,8 +123,10 @@ class PengelolaModel extends Model
     {
         $pemasukan = $this->getTotalPemasukan($startDate, $endDate);
         $pengeluaran = $this->getTotalPengeluaran($startDate, $endDate);
-        return $pemasukan - $pengeluaran;
+        $total = $pemasukan - $pengeluaran;
+        return $total;
     }
+    
 
     public function getRiwayat($startDate = null, $endDate = null)
     {

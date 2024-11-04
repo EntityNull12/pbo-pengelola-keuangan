@@ -75,6 +75,7 @@ class Pengelola extends BaseController
             // log_message('debug', 'Data yang akan disimpan: ' . print_r($data, true));
 
             // Simpan data
+            
             if ($this->pengelolaModel->insert($data)) {
                 session()->setFlashdata('success', 'Data transaksi berhasil ditambahkan.');
                 return redirect()->to('/pengelola');

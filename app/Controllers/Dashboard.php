@@ -134,14 +134,38 @@ public function index()
         if (!session()->get('user_id')) {
             return redirect()->to('/login');
         }
-
+    
         try {
             // Get the logged in user's ID
             $pengelolaId = session()->get('user_id');
-
+    
             // Clean the nominal value (remove dots)
             $nominal = str_replace('.', '', $this->request->getPost('nominal'));
-
+    
+            // Hitung total saldo saat ini dari semua transaksi hingga hari ini
+            $currentDate = date('Y-m-d');
+            $allTransactions = $this->pengelolaModel->getFilteredTransactions(
+                $pengelolaId,
+                null,
+                '2000-01-01',
+                $currentDate
+            );
+    
+            $totalSaldo = 0;
+            foreach ($allTransactions as $transaction) {
+                if ($transaction['tipe_catatan'] === 'pemasukan') {
+                    $totalSaldo += (float)$transaction['jumlah'];
+                } else {
+                    $totalSaldo -= (float)$transaction['jumlah'];
+                }
+            }
+    
+            // Jika jenis transaksi adalah 'pengeluaran' dan saldo kurang dari nominal, tampilkan error
+            if ($this->request->getPost('jenis') === 'pengeluaran' && $totalSaldo < $nominal) {
+                session()->setFlashdata('error', 'Saldo tidak mencukupi untuk melakukan pengeluaran ini.');
+                return redirect()->back();
+            }
+    
             // Prepare the data
             $data = [
                 'pengelola' => $pengelolaId,
@@ -149,31 +173,28 @@ public function index()
                 'tanggal' => $this->request->getPost('tanggal'),
                 'tipe_catatan' => $this->request->getPost('jenis')
             ];
-
+    
             // Add appropriate description based on transaction type
             if ($data['tipe_catatan'] === 'pemasukan') {
                 $data['deskripsi'] = $this->request->getPost('deskripsi');
-                $data['kategori_transaksi'] = null; // No category for income
+                $data['kategori_transaksi'] = null;
             } else {
                 $data['deskripsi'] = $this->request->getPost('deskripsiPengeluaran');
                 $data['kategori_transaksi'] = $this->request->getPost('kategori');
             }
-
-            // Debug log
-            log_message('debug', 'Attempting to save transaction data: ' . json_encode($data));
-
+    
             // Save to database
             if ($this->pengelolaModel->save($data)) {
                 session()->setFlashdata('success', 'Transaksi berhasil disimpan');
             } else {
                 session()->setFlashdata('error', 'Gagal menyimpan transaksi: ' . implode(', ', $this->pengelolaModel->errors()));
             }
-
+    
         } catch (\Exception $e) {
             log_message('error', 'Error saving transaction: ' . $e->getMessage());
             session()->setFlashdata('error', 'Terjadi kesalahan saat menyimpan transaksi');
         }
-
+    
         return redirect()->back();
     }
 
